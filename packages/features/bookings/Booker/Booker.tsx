@@ -13,8 +13,10 @@ import classNames from "@calcom/lib/classNames";
 import { DEFAULT_LIGHT_BRAND_COLOR, DEFAULT_DARK_BRAND_COLOR } from "@calcom/lib/constants";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import useMediaQuery from "@calcom/lib/hooks/useMediaQuery";
+import { SchedulingType } from "@calcom/prisma/enums";
 import { BookerLayouts, defaultBookerLayoutSettings } from "@calcom/prisma/zod-utils";
 import { Button } from "@calcom/ui";
+import { UserAvatarGroupWithOrg } from "@calcom/web/components/ui/avatar/UserAvatarGroupWithOrg";
 
 import { AvailableTimeSlots } from "./components/AvailableTimeSlots";
 import { BookEventForm } from "./components/BookEventForm";
@@ -74,6 +76,7 @@ const BookerComponent = ({
   const bookingUid =
     typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("bookingUid") : null;
   const event = useEvent();
+
   const [_layout, setLayout] = useBookerStore((state) => [state.layout, state.setLayout], shallow);
 
   const isEmbed = useIsEmbed();
@@ -232,8 +235,8 @@ const BookerComponent = ({
       {bookerState !== "booking" && event.data?.isInstantEvent && (
         <div
           className="animate-fade-in-up fixed bottom-2 z-40 my-2 opacity-0"
-          style={{ animationDelay: "2s" }}>
-          <InstantBooking />
+          style={{ animationDelay: "0.5s" }}>
+          <InstantBooking event={event.data} />
         </div>
       )}
       <div
@@ -406,7 +409,7 @@ export const Booker = (props: BookerProps) => {
   );
 };
 
-export const InstantBooking = () => {
+export const InstantBooking = ({ event }) => {
   const { t } = useLocale();
   const router = useRouter();
   const pathname = usePathname();
@@ -414,29 +417,17 @@ export const InstantBooking = () => {
   return (
     <div className=" bg-default border-subtle mx-2 block items-center gap-3 rounded-xl border p-[6px] text-sm shadow-sm delay-1000 sm:flex">
       <div className="flex items-center gap-3 ps-1">
-        {/* TODO: max. show 4 people here */}
         <div className="relative">
-          {/* <AvatarGroup
+          <UserAvatarGroupWithOrg
             size="sm"
-            className="relative"
-            items={[
-              {
-                image: "https://cal.com/stakeholder/peer.jpg",
-                alt: "Peer",
-                title: "Peer Richelsen",
-              },
-              {
-                image: "https://cal.com/stakeholder/bailey.jpg",
-                alt: "Bailey",
-                title: "Bailey Pumfleet",
-              },
-              {
-                image: "https://cal.com/stakeholder/alex-van-andel.jpg",
-                alt: "Alex",
-                title: "Alex Van Andel",
-              },
-            ]}
-          /> */}
+            className="border-muted"
+            organization={{
+              slug: event.entity.orgSlug,
+              name: event.entity.name || "",
+            }}
+            users={event.schedulingType !== SchedulingType.ROUND_ROBIN ? event.users : []}
+          />
+
           <div className="border-muted absolute -bottom-0.5 -right-1 h-2 w-2 rounded-full border bg-green-500" />
         </div>
         <div>{t("dont_want_to_wait")}</div>
