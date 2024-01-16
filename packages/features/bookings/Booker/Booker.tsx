@@ -409,7 +409,9 @@ export const Booker = (props: BookerProps) => {
   );
 };
 
-export const InstantBooking = ({ event }) => {
+type InstantBookingProps = { event: RouterOutputs["viewer"]["public"]["event"] };
+
+export const InstantBooking = ({ event }: InstantBookingProps) => {
   const { t } = useLocale();
   const router = useRouter();
   const pathname = usePathname();

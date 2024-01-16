@@ -172,7 +172,7 @@ export const BookEventFormChild = ({
   const timeslot = useBookerStore((state) => state.selectedTimeslot);
   const recurringEventCount = useBookerStore((state) => state.recurringEventCount);
   const username = useBookerStore((state) => state.username);
-  const [expiryTime, setExpiryTime] = useState<Date | undefined>();
+  const [expiryTime, setExpiryTime] = useState<Date | undefined>("2024-01-16T18:08:12.253Z");
 
   type BookingFormValues = {
     locationType?: EventLocationType["type"];
@@ -484,14 +484,40 @@ const RedirectToInstantMeetingModal = ({ expiryTime }: { expiryTime?: Date }) =>
   const pathname = usePathname();
   const bookingId = parseInt(getQueryParam("bookingId") || "0");
   const hasInstantMeetingTokenExpired = expiryTime && new Date(expiryTime) < new Date();
+  const [timeRemaining, setTimeRemaining] = useState(calculateTimeRemaining());
 
-  const instantBooking = trpc.viewer.bookings.getInstantBookingLocation.useQuery(
+  function calculateTimeRemaining() {
+    const now = dayjs();
+    const expiration = dayjs(expiryTime);
+    const duration = expiration.diff(now);
+    return Math.max(duration, 0);
+  }
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeRemaining(calculateTimeRemaining());
+    }, 1000);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
+
+  const formatTime = (milliseconds) => {
+    const duration = dayjs.duration(milliseconds);
+    const seconds = duration.seconds();
+
+    return `${seconds}s`;
+  };
+
+  trpc.viewer.bookings.getInstantBookingLocation.useQuery(
     {
       bookingId: bookingId,
     },
     {
       enabled: !!bookingId && !hasInstantMeetingTokenExpired,
       refetchInterval: 2000,
+      refetchIntervalInBackground: true,
       onSuccess: (data) => {
         try {
           showToast(t("something_went_wrong_on_our_end"), "error");
@@ -511,6 +537,21 @@ const RedirectToInstantMeetingModal = ({ expiryTime }: { expiryTime?: Date }) =>
       },
     }
   );
+
+  useEffect(() => {
+    if (hasInstantMeetingTokenExpired) return;
+
+    const handleBeforeUnload = (event) => {
+      const message = "/o";
+      event.returnValue = message; // Standard for most browsers
+      return message; // For some older browsers
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [hasInstantMeetingTokenExpired]);
 
   return (
     <Dialog open={!!bookingId}>
@@ -532,15 +573,10 @@ const RedirectToInstantMeetingModal = ({ expiryTime }: { expiryTime?: Date }) =>
           ) : (
             <div className="text-center">
               <p className="font-medium">{t("connecting_you_to_someone")}</p>
-              {/* TODO: Add countdown from 60 seconds
-                  We are connecting you!
-                  Please schedule a future call if we're not available in XX seconds.
-              */}
-
-              {/* Once countdown ends: 
-                  Oops, we couldn't connect you this time.
-                  Please schedule a future call instead. We value your time.  
-              */}
+              <p>
+                Please schedule a future call if we&apos;re not available in {formatTime(timeRemaining)}{" "}
+                seconds
+              </p>
 
               <p className="font-medium">{t("please_do_not_close_this_tab")}</p>
               <div className="h-[450px]">
