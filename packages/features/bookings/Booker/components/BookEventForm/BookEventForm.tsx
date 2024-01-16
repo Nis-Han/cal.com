@@ -172,7 +172,7 @@ export const BookEventFormChild = ({
   const timeslot = useBookerStore((state) => state.selectedTimeslot);
   const recurringEventCount = useBookerStore((state) => state.recurringEventCount);
   const username = useBookerStore((state) => state.username);
-  const [expiryTime, setExpiryTime] = useState<Date | undefined>("2024-01-16T18:08:12.253Z");
+  const [expiryTime, setExpiryTime] = useState<Date | undefined>();
 
   type BookingFormValues = {
     locationType?: EventLocationType["type"];
@@ -503,7 +503,7 @@ const RedirectToInstantMeetingModal = ({ expiryTime }: { expiryTime?: Date }) =>
     };
   }, []);
 
-  const formatTime = (milliseconds) => {
+  const formatTime = (milliseconds: number) => {
     const duration = dayjs.duration(milliseconds);
     const seconds = duration.seconds();
 
@@ -541,7 +541,7 @@ const RedirectToInstantMeetingModal = ({ expiryTime }: { expiryTime?: Date }) =>
   useEffect(() => {
     if (hasInstantMeetingTokenExpired) return;
 
-    const handleBeforeUnload = (event) => {
+    const handleBeforeUnload = (event: window.BeforeUnloadEvent) => {
       const message = "/o";
       event.returnValue = message; // Standard for most browsers
       return message; // For some older browsers

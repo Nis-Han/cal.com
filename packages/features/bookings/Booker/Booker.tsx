@@ -15,6 +15,7 @@ import { useLocale } from "@calcom/lib/hooks/useLocale";
 import useMediaQuery from "@calcom/lib/hooks/useMediaQuery";
 import { SchedulingType } from "@calcom/prisma/enums";
 import { BookerLayouts, defaultBookerLayoutSettings } from "@calcom/prisma/zod-utils";
+import { type RouterOutputs } from "@calcom/trpc";
 import { Button } from "@calcom/ui";
 import { UserAvatarGroupWithOrg } from "@calcom/web/components/ui/avatar/UserAvatarGroupWithOrg";
 
