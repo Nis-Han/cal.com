@@ -410,7 +410,7 @@ export const Booker = (props: BookerProps) => {
   );
 };
 
-type InstantBookingProps = { event: RouterOutputs["viewer"]["public"]["event"] };
+type InstantBookingProps = { event: NonNullable<RouterOutputs["viewer"]["public"]["event"]> };
 
 export const InstantBooking = ({ event }: InstantBookingProps) => {
   const { t } = useLocale();

@@ -541,7 +541,7 @@ const RedirectToInstantMeetingModal = ({ expiryTime }: { expiryTime?: Date }) =>
   useEffect(() => {
     if (hasInstantMeetingTokenExpired) return;
 
-    const handleBeforeUnload = (event: window.BeforeUnloadEvent) => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
       const message = "/o";
       event.returnValue = message; // Standard for most browsers
       return message; // For some older browsers
