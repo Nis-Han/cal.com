@@ -473,7 +473,7 @@ export const BookEventFormChild = ({
         }}
         isUserSessionRequiredToVerify={false}
       />
-      <RedirectToInstantMeetingModal expiryTime={expiryTime} />
+      {expiryTime && <RedirectToInstantMeetingModal expiryTime={expiryTime} />}
     </div>
   );
 };
@@ -494,6 +494,8 @@ const RedirectToInstantMeetingModal = ({ expiryTime }: { expiryTime?: Date }) =>
   }
 
   useEffect(() => {
+    if (!expiryTime) return;
+
     const timer = setInterval(() => {
       setTimeRemaining(calculateTimeRemaining());
     }, 1000);
@@ -501,13 +503,14 @@ const RedirectToInstantMeetingModal = ({ expiryTime }: { expiryTime?: Date }) =>
     return () => {
       clearInterval(timer);
     };
-  }, []);
+  }, [expiryTime]);
 
   const formatTime = (milliseconds: number) => {
     const duration = dayjs.duration(milliseconds);
     const seconds = duration.seconds();
+    const minutes = duration.minutes();
 
-    return `${seconds}s`;
+    return `${minutes}m ${seconds}s`;
   };
 
   trpc.viewer.bookings.getInstantBookingLocation.useQuery(
@@ -554,7 +557,7 @@ const RedirectToInstantMeetingModal = ({ expiryTime }: { expiryTime?: Date }) =>
   }, [hasInstantMeetingTokenExpired]);
 
   return (
-    <Dialog open={!!bookingId}>
+    <Dialog open={!!bookingId && !!expiryTime}>
       <DialogContent enableOverflow className="py-8">
         <div>
           {hasInstantMeetingTokenExpired ? (
@@ -573,13 +576,15 @@ const RedirectToInstantMeetingModal = ({ expiryTime }: { expiryTime?: Date }) =>
           ) : (
             <div className="text-center">
               <p className="font-medium">{t("connecting_you_to_someone")}</p>
-              <p>
-                Please schedule a future call if we&apos;re not available in {formatTime(timeRemaining)}{" "}
-                seconds
+              <p className="font-medium">{t("please_do_not_close_this_tab")}</p>
+
+              <p className="mt-2 font-medium">
+                {t("please_schedule_future_call", {
+                  seconds: formatTime(timeRemaining),
+                })}
               </p>
 
-              <p className="font-medium">{t("please_do_not_close_this_tab")}</p>
-              <div className="h-[450px]">
+              <div className="mt-4 h-[450px]">
                 <iframe className="mx-auto h-full" src="https://cal.games/" />
               </div>
             </div>
