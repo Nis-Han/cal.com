@@ -610,7 +610,7 @@ const RedirectToInstantMeetingModal = ({ expiryTime }: { expiryTime?: Date }) =>
               </p>
 
               <div className="mt-4 h-[414px]">
-                <iframe className="mx-auto h-full" src="https://cal.games/" />
+                <iframe className="mx-auto h-full w-[276px] rounded-lg"" src="https://cal.games/" />
               </div>
             </div>
           )}
